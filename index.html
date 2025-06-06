@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cashew</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .header svg {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        .header span {
+            font-size: 24px;
+            color: #333;
+            font-weight: normal;
+        }
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px;
+            width: 100%;
+            max-width: 320px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            min-height: 600px;
+        }
+        .qr-code {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .qr-code img {
+            width: 180px;
+            height: 180px;
+            display: block;
+            margin: 0 auto;
+        }
+        .checkmark-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background-color: green;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: rotate 2s infinite linear; /* Анимация вращения */
+        }
+        .checkmark {
+            font-size: 40px;
+            color: white;
+        }
+        @keyframes rotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        .info {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.4;
+            text-align: left;
+            margin-top: 10px;
+        }
+        .info p {
+            margin: 8px 0;
+        }
+        .info strong {
+            color: #000;
+            font-weight: normal;
+        }
+        .price {
+            font-size: 14px;
+            color: #333;
+            margin-top: 10px;
+            font-weight: normal;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px;
+            color: white;
+            background-color: #1E90FF; /* Синий фон */
+            font-size: 12px;
+            font-weight: normal;
+            margin-top: auto; /* Прижимает футер к низу */
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <!-- Логотип Cashew -->
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="20" fill="#F1592A"/>
+            <path d="M12 15C12 11.6863 14.6863 9 18 9H22C25.3137 9 28 11.6863 28 15C28 18.3137 25.3137 21 22 21H18C14.6863 21 12 18.3137 12 15Z" fill="white"/>
+        </svg>
+        <span>cashew</span>
+    </div>
+    <div class="container">
+        <div class="qr-code">
+            <!-- QR-код -->
+            <img id="qrcode" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://pay2.cashewpay.by/#0002013272013246bc36bb1d9741b9ad3a97ecaffff79a1032f7f15cdb02a048a189d36d8c9da8fe8754030.963040017" alt="QR Code">
+
+<div class="checkmark-container">
+                <div class="checkmark">✔</div>
+            </div>
+        </div>
+        <div class="info">
+            <p><strong>Получатель:</strong><br>
+            Оплата проезда в автобусе, рап.<br>
+            Номер 44695 г. Пинск ОАО «Пинский автобусный парк»</p>
+            <p><strong>Активен с:</strong><br>
+            <span id="active-from"></span></p>
+            <p><strong>Активировано до:</strong><br>
+            <span id="active-to"></span></p>
+            <p><strong>Описание:</strong><br>
+            #6b39c5e26009f014#</p>
+            <p class="price"><strong>Цена:</strong><br>
+            0,9 белорусских рублей</p>
+        </div>
+    </div>
+    <div class="footer">
+        Кешыо<br>
+        info@cashew.me
+    </div>
+
+    <script>
+        // Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+
+        // Динамическое обновление времени с телефона
+        function updateTime() {
+            const now = new Date();
+            const dateString = now.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }).replace(/\//g, '.');
+            const timeString = now.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            });
+            const formattedTime = ${dateString} ${timeString};
+
+            // Устанавливаем "Активен с"
+            document.getElementById('active-from').textContent = formattedTime;
+
+            // Устанавливаем "Активировано до" (текущее время + 1 час)
+            const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+            const laterDateString = oneHourLater.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }).replace(/\//g, '.');
+            const laterTimeString = oneHourLater.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            });
+            document.getElementById('active-to').textContent = ${laterDateString} ${laterTimeString};
+        }
+
+        // Обновляем время сразу и каждую секунду
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
